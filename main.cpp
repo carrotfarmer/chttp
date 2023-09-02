@@ -1,4 +1,4 @@
-#include <signal.h>
+#include <csignal>
 
 #include "http_server.hpp"
 
