@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -8,11 +9,11 @@
 
 class HttpServer {
 public:
-    explicit HttpServer(const char* port) : m_port(port) {}
+    explicit HttpServer(const char *port) : m_port(port) {}
 
     void Start() {
         int res_err = getaddrinfo("localhost", m_port, &m_hints, &m_res);
-        if (res_err == -1)  {
+        if (res_err == -1) {
             std::cerr << "getaddrinfo failed!" << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -32,7 +33,7 @@ public:
         }
 
         if (listen(m_socketfd, SOMAXCONN) == -1) {
-            std::cerr << "OOF SOMETHING AINT RIGHT" << std::endl;
+            std::cerr << "OOF SOMETHING AIN\'T RIGHT" << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -45,21 +46,53 @@ public:
             }
 
             std::cout << "Client connection established." << std::endl;
+            HandleConnection(client);
         }
     }
 
+
     ~HttpServer() {
-        freeaddrinfo(&m_hints);
-        close(m_socketfd);
+        clean();
     }
 
     void Stop() {
+        clean();
+    }
+
+private:
+
+    void HandleConnection(int client) {
+        char buffer[1024];
+        std::string buf;
+        std::string req;
+        std::string header;
+
+        ssize_t bytes_read = read(client, buffer, sizeof(buffer));
+
+        if (bytes_read > 0) {
+            buf.append(buffer, bytes_read);
+            size_t header_end = buf.find("\r\n\r\n");
+
+            if (header_end != std::string::npos) {
+                req = buf.substr(0, header_end);
+            }
+
+            // TODO: Convert req to istringstream
+            // TODO: Get first line of req
+            // TODO: Get request method somehow ig
+            // TODO: Return a response (html maybe) with the request method
+        } else {
+            clean();
+            std::cout << "Client closed connection." << std::endl;
+        }
+    }
+
+    void clean() {
         freeaddrinfo(&m_hints);
         close(m_socketfd);
     }
 
-private:
     struct addrinfo m_hints{.ai_family = AF_UNSPEC, .ai_socktype=SOCK_STREAM}, *m_res;
-    const char* m_port;
+    const char *m_port;
     int m_socketfd;
 };
