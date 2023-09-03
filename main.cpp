@@ -21,6 +21,7 @@ int main() {
 
     server_ptr = &server;
 
+    // im not sure if this works but ill leave it in here just in case if it does
     auto handle_termination = [](int exit_code) {
         server_ptr->Stop();
         std::cout << "Exit detected. Cleaned up!" << std::endl;

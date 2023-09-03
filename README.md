@@ -25,6 +25,8 @@ server.AddRoute("/deezhtml", RequestMethod::GET, "text/html", "<h1>deez nuts</h1
 server.Start();
 ```
 
+Check out [main.cpp](https://github.com/carrotfarmer/chttp/blob/master/main.cpp) for a better example.
+
 ## features
 
 - Blazingly fast 🚀🚀🚀
