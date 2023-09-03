@@ -11,15 +11,26 @@ public:
                                                                          m_content_type(std::move(content_type)),
                                                                          m_content(std::move(content)) {};
 
-    std::string generate_response() {
-        std::stringstream res;
+    void send_response(int client) {
+        std::stringstream res_stream;
         // status line
-        res << "HTTP/1.1 " << m_status << " OK" << "\n";
-        res << "Date: " << Utils::gen_http_date() << " GMT" << "\n";
-        res << "Content-Length: " << m_content.length() << "\n";
-        res << "Content-Type: " << m_content_type << "\r\n\r\n" << m_content;
+        res_stream << "HTTP/1.1 " << m_status << " OK" << "\n";
+        res_stream << "Date: " << Utils::gen_http_date() << " GMT" << "\n";
+        res_stream << "Content-Length: " << m_content.length() << "\n";
+        res_stream << "Content-Type: " << m_content_type << "\r\n\r\n" << m_content;
 
-        return res.str();
+        auto res = res_stream.str();
+
+        size_t res_len = res.length();
+        std::cout << res.c_str() << std::endl;
+        ssize_t bytes_sent = write(client, res.c_str(), res_len);
+
+        if (bytes_sent == -1) {
+            std::cerr << "Error sending response to client" << std::endl;
+            std::cerr << strerror(errno) << std::endl;
+        } else {
+            std::cout << "Sent " << bytes_sent << " bytes to client" << std::endl;
+        }
     }
 
 private:

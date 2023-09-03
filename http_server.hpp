@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -9,10 +10,11 @@
 
 #include "./utils.hpp"
 #include "./http.hpp"
+#include "./route.hpp"
 
 class HttpServer {
 public:
-    explicit HttpServer(const char *port) : m_port(port) {}
+    explicit HttpServer(const char *port) : m_port(port) {} // NOLINT(*-pro-type-member-init)
 
     void Start() {
         int res_err = getaddrinfo("localhost", m_port, &m_hints, &m_res);
@@ -53,6 +55,12 @@ public:
         }
     }
 
+    void AddRoute(const std::string &path, const RequestMethod method, const std::string &content_type,
+                  const std::string &content) {
+        Route route = Route{path, method, content_type, content};
+        m_routes.push_back(route);
+    }
+
     ~HttpServer() {
         clean();
     }
@@ -62,7 +70,6 @@ public:
     }
 
 private:
-
     void HandleConnection(int client) {
         char buffer[1024];
         std::string buf;
@@ -80,21 +87,22 @@ private:
             }
 
             RequestMethod rm = Utils::parse_request_method(req);
+            std::string p = Utils::parse_path(req);
 
-            HttpResponse http_res = HttpResponse{ 200, "text/plain", "deez nuts" };
-            auto res = http_res.generate_response();
+            bool path_matched = false;
 
-            size_t res_len = res.length();
-            std::cout << res.c_str() << std::endl;
-            ssize_t bytes_sent = write(client, res.c_str(), res_len);
-
-            if (bytes_sent == -1) {
-                std::cerr << "Error sending response to client" << std::endl;
-                std::cerr << strerror(errno) << std::endl;
-            } else {
-                std::cout << "Sent " << bytes_sent << " bytes to client" << std::endl;
+            for (const auto& route: m_routes) {
+                if (route.request_method() == rm && route.path() == p) {
+                    path_matched = true;
+                    HttpResponse http_res = HttpResponse{200, route.content_type(), route.content()};
+                    http_res.send_response(client);
+                }
             }
 
+            if (!path_matched) {
+                HttpResponse http_res = HttpResponse{404, "text/plain", "404 Not Found"};
+                http_res.send_response(client);
+            }
         } else {
             clean();
             std::cout << "Client closed connection." << std::endl;
@@ -108,5 +116,6 @@ private:
 
     struct addrinfo m_hints{.ai_family = AF_UNSPEC, .ai_socktype=SOCK_STREAM}, *m_res;
     const char *m_port;
+    std::vector<Route> m_routes;
     int m_socketfd;
 };

@@ -8,6 +8,10 @@ HttpServer* server_ptr = nullptr;
 
 int main() {
     HttpServer server = HttpServer{PORT};
+
+    server.AddRoute("/", RequestMethod::GET, "text/plain", "deez nuts");
+    server.AddRoute("/deez", RequestMethod::GET, "text/plain", "nuts");
+
     server.Start();
 
     server_ptr = &server;

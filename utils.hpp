@@ -13,7 +13,7 @@ enum class RequestMethod {
 };
 
 namespace Utils {
-    RequestMethod parse_request_method(std::string& header) {
+    RequestMethod parse_request_method(std::string header) {
         size_t i = header.find('\n');
         header = header.substr(0, i);
         size_t u = header.find(' ');
@@ -27,6 +27,18 @@ namespace Utils {
         else if (header == "PUT") return RequestMethod::PUT;
         else if (header == "DELETE") return RequestMethod::DELETE;
         else std::cerr << "ERR: Invalid request method!" << std::endl;
+    }
+
+    std::string parse_path(std::string header) {
+        size_t i = header.find('\n');
+        header = header.substr(0, i);
+        size_t u = header.find(' ');
+        header = header.substr(u + 1, header.length() - u - 1);
+        u = header.find(' ');
+        header = header.substr(0, u);
+
+        std::cout << "Incoming request path: " << header << std::endl;
+        return header;
     }
 
     std::string gen_http_date() {
