@@ -14,7 +14,14 @@
 
 class HttpServer {
 public:
-    explicit HttpServer(const char *port) : m_port(port) {} // NOLINT(*-pro-type-member-init)
+    explicit HttpServer(const std::string port) {
+        if (port.find_first_not_of("0123456789") == std::string::npos) {
+            m_port = port.c_str();
+            return;
+        };
+
+        std::cerr << "ERROR: Don\'t be a dumbass. It\'s a port NUMBER." << std::endl;
+    } // NOLINT(*-pro-type-member-init)
 
     void Start() {
         int res_err = getaddrinfo("localhost", m_port, &m_hints, &m_res);

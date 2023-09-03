@@ -3,7 +3,7 @@
 #include "http_server.hpp"
 #include "template.hpp"
 
-const char *PORT = "4200";
+const std::string PORT = "4200";
 
 HttpServer *server_ptr = nullptr;
 
