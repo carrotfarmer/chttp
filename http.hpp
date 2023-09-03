@@ -13,6 +13,7 @@ public:
 
     void send_response(int client) {
         std::stringstream res_stream;
+
         // status line
         res_stream << "HTTP/1.1 " << m_status << " OK" << "\n";
         res_stream << "Date: " << Utils::gen_http_date() << " GMT" << "\n";
@@ -22,7 +23,6 @@ public:
         auto res = res_stream.str();
 
         size_t res_len = res.length();
-        std::cout << res.c_str() << std::endl;
         ssize_t bytes_sent = write(client, res.c_str(), res_len);
 
         if (bytes_sent == -1) {

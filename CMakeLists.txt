@@ -7,4 +7,5 @@ add_executable(chttp main.cpp
         http_server.hpp
         utils.hpp
         http.hpp
-        route.hpp)
+        route.hpp
+        template.hpp)
