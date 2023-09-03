@@ -4,4 +4,6 @@ project(chttp)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(chttp main.cpp
-        http_server.hpp)
+        http_server.hpp
+        utils.hpp
+        http.hpp)

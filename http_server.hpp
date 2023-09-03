@@ -7,6 +7,9 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include "./utils.hpp"
+#include "./http.hpp"
+
 class HttpServer {
 public:
     explicit HttpServer(const char *port) : m_port(port) {}
@@ -37,7 +40,7 @@ public:
             exit(EXIT_FAILURE);
         }
 
-        std::cout << "Running on port " << m_port << std::endl;
+        std::cout << "Running on port: " << m_port << std::endl;
         while (true) {
             int client = accept(m_socketfd, nullptr, nullptr);
             if (client == -1) {
@@ -49,7 +52,6 @@ public:
             HandleConnection(client);
         }
     }
-
 
     ~HttpServer() {
         clean();
@@ -77,10 +79,22 @@ private:
                 req = buf.substr(0, header_end);
             }
 
-            // TODO: Convert req to istringstream
-            // TODO: Get first line of req
-            // TODO: Get request method somehow ig
-            // TODO: Return a response (html maybe) with the request method
+            RequestMethod rm = Utils::parse_request_method(req);
+
+            HttpResponse http_res = HttpResponse{ 200, "text/plain", "deez nuts" };
+            auto res = http_res.generate_response();
+
+            size_t res_len = res.length();
+            std::cout << res.c_str() << std::endl;
+            ssize_t bytes_sent = write(client, res.c_str(), res_len);
+
+            if (bytes_sent == -1) {
+                std::cerr << "Error sending response to client" << std::endl;
+                std::cerr << strerror(errno) << std::endl;
+            } else {
+                std::cout << "Sent " << bytes_sent << " bytes to client" << std::endl;
+            }
+
         } else {
             clean();
             std::cout << "Client closed connection." << std::endl;
