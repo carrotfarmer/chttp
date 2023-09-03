@@ -11,6 +11,7 @@ int main() {
 
     server.AddRoute("/", RequestMethod::GET, "text/plain", "deez nuts");
     server.AddRoute("/deez", RequestMethod::GET, "text/plain", "nuts");
+    server.AddRoute("/html", RequestMethod::GET, "text/html", "<h1>omg html page</h1>");
 
     server.Start();
 
