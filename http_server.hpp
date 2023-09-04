@@ -14,11 +14,11 @@
 
 class HttpServer {
 public:
-    explicit HttpServer(const std::string port) {
+    explicit HttpServer(const std::string& port) {
         if (port.find_first_not_of("0123456789") == std::string::npos) {
             m_port = port.c_str();
             return;
-        };
+        }
 
         std::cerr << "ERROR: Don\'t be a dumbass. It\'s a port NUMBER." << std::endl;
     } // NOLINT(*-pro-type-member-init)
@@ -121,8 +121,8 @@ private:
         close(m_socketfd);
     }
 
-    struct addrinfo m_hints{.ai_family = AF_UNSPEC, .ai_socktype=SOCK_STREAM}, *m_res;
+    struct addrinfo m_hints{.ai_family = AF_UNSPEC, .ai_socktype=SOCK_STREAM}, *m_res{};
     const char *m_port;
     std::vector<Route> m_routes;
-    int m_socketfd;
+    int m_socketfd{};
 };
